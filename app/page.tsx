@@ -1,5 +1,6 @@
-import { Button } from   "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import PingTester from "./components/PingTester";
 
 export default function Home() {
   return (
@@ -21,6 +22,7 @@ export default function Home() {
             Explore Previous Papers
           </Button>
         </div>
+        <PingTester />
       </main>
 
       <section className="mx-auto grid max-w-5xl grid-cols-1 gap-4 px-6 pb-24 sm:grid-cols-3">
