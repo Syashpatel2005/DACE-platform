@@ -4,20 +4,27 @@ import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+function getInitialTheme(): boolean {
+  if (typeof window === "undefined") return false;
+  const stored = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("theme="))
+    ?.split("=")[1];
+  return (
+    stored === "dark" || (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches)
+  );
+}
+
 export default function ThemeToggle() {
-  const [isDark, setIsDark] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
+    const initial = getInitialTheme();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reading browser-only theme preference (cookie/matchMedia) after hydration is unavoidable here
+    setIsDark(initial);
+    document.documentElement.classList.toggle("dark", initial);
     setMounted(true);
-    const stored = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("theme="))
-      ?.split("=")[1];
-    const prefersDark =
-      stored === "dark" || (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
-    setIsDark(prefersDark);
-    document.documentElement.classList.toggle("dark", prefersDark);
   }, []);
 
   function toggleTheme() {
