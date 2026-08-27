@@ -17,20 +17,20 @@ export default function DashboardPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-brand-navy">Welcome back</h1>
-          <p className="text-slate-600">Here&apos;s where you left off.</p>
+        <h1 className="text-2xl font-bold text-brand-navy dark:text-white">Welcome back</h1>
+        <p className="text-slate-600 dark:text-slate-300">Here&apos;s where you left off.</p>
         </div>
         <UserButton />
       </div>
 
-      <div className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-6 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-brand-navy">
+            <h2 className="text-lg font-semibold text-brand-navy dark:text-white">
             Ready for today&apos;s practice?
-          </h2>
-          <p className="text-sm text-slate-600">
+            </h2>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
             Jump into a full mock test or generate a custom one.
-          </p>
+            </p>
         </div>
         <div className="flex gap-3">
           <Button className="bg-brand-blue hover:bg-brand-navy">
