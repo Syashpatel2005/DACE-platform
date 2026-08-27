@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Menu } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
@@ -31,10 +30,11 @@ export default function MobileSidebar() {
   return (
     <div className="md:hidden">
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" aria-label="Open menu">
-            <Menu className="h-5 w-5" />
-          </Button>
+        <SheetTrigger
+          aria-label="Open menu"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-md text-text-secondary hover:bg-surface hover:text-text-primary"
+        >
+          <Menu className="h-5 w-5" />
         </SheetTrigger>
         <SheetContent side="left" className="bg-surface-muted">
           <SheetTitle className="px-4 pt-4 text-text-primary">Menu</SheetTitle>
