@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { Show, UserButton } from "@clerk/nextjs";
+
 export default function Header() {
   return (
     <header className="border-b border-slate-200 bg-white">
@@ -9,9 +12,20 @@ export default function Header() {
           </span>
         </div>
         <nav className="flex items-center gap-6 text-sm font-medium text-slate-600">
-          <a href="#" className="hover:text-brand-blue">Dashboard</a>
-          <a href="#" className="hover:text-brand-blue">Previous Papers</a>
-          <a href="#" className="hover:text-brand-blue">Sign In</a>
+          <Link href="/dashboard" className="hover:text-brand-blue">
+            Dashboard
+          </Link>
+          <a href="#" className="hover:text-brand-blue">
+            Previous Papers
+          </a>
+          <Show when="signed-out">
+            <Link href="/sign-in" className="hover:text-brand-blue">
+              Sign In
+            </Link>
+          </Show>
+          <Show when="signed-in">
+            <UserButton />
+          </Show>
         </nav>
       </div>
     </header>
