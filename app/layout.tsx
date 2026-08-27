@@ -31,7 +31,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} h-full antialiased ${theme === "dark" ? "dark" : ""}`}
       >
-        <body className="min-h-full flex flex-col bg-brand-bg dark:bg-slate-900">
+        <body className="min-h-full flex flex-col bg-surface-muted">
           <Header />
           {children}
         </body>

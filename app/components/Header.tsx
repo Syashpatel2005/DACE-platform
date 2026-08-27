@@ -4,15 +4,15 @@ import ThemeToggle from "./ThemeToggle";
 
 export default function Header() {
   return (
-    <header className="border-b border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+    <header className="border-b border-border-default bg-surface-muted">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <div className="flex items-center gap-2">
-          <span className="text-xl font-bold text-brand-navy dark:text-white">DAce</span>
-          <span className="hidden text-sm text-slate-500 sm:inline">
+          <span className="text-xl font-bold text-text-primary">DAce</span>
+          <span className="hidden text-sm text-text-secondary sm:inline">
             GATE DA AI Test Series
           </span>
         </div>
-        <nav className="flex items-center gap-6 text-sm font-medium text-slate-600 dark:text-slate-300">
+        <nav className="flex items-center gap-6 text-sm font-medium text-text-secondary">
           <Link href="/dashboard" className="hover:text-brand-blue">
             Dashboard
           </Link>
