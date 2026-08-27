@@ -46,3 +46,4 @@ npm run dev
 - shadcn components built on **Base UI** (not Radix) do not support the `asChild` prop — nest children directly instead, or use Base UI's `render` prop pattern.
 - Clerk Core 3 replaced `<SignedIn>`/`<SignedOut>` with a single `<Show when="signed-in">` / `<Show when="signed-out">` component.
 - Next.js 16 removed the `next lint` command entirely — use `"lint": "eslint ."` in package.json instead. The auto-generated `eslint.config.mjs` using `FlatCompat` will crash with "Converting circular structure to JSON" on `eslint-config-next`'s React hooks config — import `eslint-config-next/core-web-vitals` and `eslint-config-next/typescript` directly instead (native flat config, no FlatCompat needed).
+- Next.js 16 deprecated `middleware.ts` in favor of `proxy.ts` — same auth-protection logic, new file name/convention. Migrate with `npx @next/codemod@canary middleware-to-proxy .`
