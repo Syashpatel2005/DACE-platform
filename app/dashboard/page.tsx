@@ -99,9 +99,6 @@ export default function DashboardPage() {
           href="/dashboard/my-tests"
           icon={History}
         />
-        <Button variant="outline" className="border-border-default text-text-primary">
-            Generate Custom Test
-            </Button>
       </div>
     </div>
   );
