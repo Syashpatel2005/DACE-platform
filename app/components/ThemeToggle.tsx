@@ -15,8 +15,7 @@ export default function ThemeToggle() {
       .find((row) => row.startsWith("theme="))
       ?.split("=")[1];
     const prefersDark =
-      stored === "dark" ||
-      (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      stored === "dark" || (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
     setIsDark(prefersDark);
     document.documentElement.classList.toggle("dark", prefersDark);
   }, []);

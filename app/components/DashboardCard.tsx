@@ -19,16 +19,14 @@ export default function DashboardCard({
 }: DashboardCardProps) {
   return (
     <Link href={href}>
-      <Card className="h-full border-border-default bg-surface transition-colors hover:border-brand-blue">
+      <Card className="border-border-default bg-surface hover:border-brand-blue h-full transition-colors">
         <CardHeader className="flex flex-row items-center gap-3">
-          <Icon className="h-5 w-5 text-brand-blue" />
+          <Icon className="text-brand-blue h-5 w-5" />
           <CardTitle className="text-text-primary">{title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-text-secondary">{description}</p>
-          {stat && (
-            <p className="mt-3 text-sm font-semibold text-brand-blue">{stat}</p>
-          )}
+          <p className="text-text-secondary text-sm">{description}</p>
+          {stat && <p className="text-brand-blue mt-3 text-sm font-semibold">{stat}</p>}
         </CardContent>
       </Card>
     </Link>

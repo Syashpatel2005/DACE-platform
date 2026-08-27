@@ -16,13 +16,13 @@ const navItems = [
 
 export default function Sidebar() {
   return (
-    <aside className="hidden w-64 shrink-0 border-r border-border-default bg-surface-muted p-4 md:block">
+    <aside className="border-border-default bg-surface-muted hidden w-64 shrink-0 border-r p-4 md:block">
       <nav className="flex flex-col gap-1">
         {navItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
-            className="rounded-md px-3 py-2 text-sm font-medium text-text-secondary hover:bg-surface hover:text-text-primary"
+            className="text-text-secondary hover:bg-surface hover:text-text-primary rounded-md px-3 py-2 text-sm font-medium"
           >
             {item.label}
           </Link>

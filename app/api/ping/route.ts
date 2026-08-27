@@ -9,10 +9,7 @@ export async function POST() {
     return NextResponse.json({ success: true, ping });
   } catch (error) {
     console.error("Ping creation failed:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to create ping" },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: "Failed to create ping" }, { status: 500 });
   }
 }
 
@@ -25,9 +22,6 @@ export async function GET() {
     return NextResponse.json({ success: true, pings });
   } catch (error) {
     console.error("Ping fetch failed:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to fetch pings" },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: "Failed to fetch pings" }, { status: 500 });
   }
 }

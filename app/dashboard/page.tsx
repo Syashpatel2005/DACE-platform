@@ -17,25 +17,23 @@ export default function DashboardPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-        <h1 className="text-2xl font-bold text-text-primary">Welcome back</h1>
-        <p className="text-text-secondary">Here&apos;s where you left off.</p>
+          <h1 className="text-text-primary text-2xl font-bold">Welcome back</h1>
+          <p className="text-text-secondary">Here&apos;s where you left off.</p>
         </div>
         <UserButton />
       </div>
 
-    <div className="flex flex-col gap-3 rounded-lg border border-border-default bg-surface p-6 sm:flex-row sm:items-center sm:justify-between">
-    <div>
-        <h2 className="text-lg font-semibold text-text-primary">
-        Ready for today&apos;s practice?
-        </h2>
-        <p className="text-sm text-text-secondary">
-        Jump into a full mock test or generate a custom one.
-        </p>
-    </div>
+      <div className="border-border-default bg-surface flex flex-col gap-3 rounded-lg border p-6 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-text-primary text-lg font-semibold">
+            Ready for today&apos;s practice?
+          </h2>
+          <p className="text-text-secondary text-sm">
+            Jump into a full mock test or generate a custom one.
+          </p>
+        </div>
         <div className="flex gap-3">
-          <Button className="bg-brand-blue hover:bg-brand-navy">
-            Start GATE DA Test
-          </Button>
+          <Button className="bg-brand-blue hover:bg-brand-navy">Start GATE DA Test</Button>
           <Button variant="outline">Generate Custom Test</Button>
         </div>
       </div>
