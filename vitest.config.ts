@@ -6,7 +6,10 @@ import { config } from "dotenv";
 config({ path: ".env.local" });
 
 export default defineConfig({
-  plugins: [tsconfigPaths(), react()],
+  plugins: [
+    tsconfigPaths({ projects: ["./tsconfig.vitest.json"] }),
+    react(),
+  ],
   test: {
     environment: "node",
     include: ["**/*.test.ts", "**/*.test.tsx"],

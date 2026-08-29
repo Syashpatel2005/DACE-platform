@@ -52,3 +52,4 @@ npm run dev
 - Question.correctAnswer for MCQ: JSON number = index into options (e.g., 2)
 - Question.correctAnswer for MSQ: JSON array of numbers = indices into options (e.g., [0, 2])
 - Question.correctAnswer for NAT: not used — use natAnswer + natTolerance instead
+- Scripts run directly via `tsx` (like `prisma/seed.ts`) do NOT automatically get env vars from `prisma.config.ts`'s `dotenv/config` import — that only loads when the Prisma CLI itself reads the config file. Any standalone script touching the database needs its own explicit `import "dotenv/config"` at the top.
