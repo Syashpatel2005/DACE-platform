@@ -47,3 +47,8 @@ npm run dev
 - Clerk Core 3 replaced `<SignedIn>`/`<SignedOut>` with a single `<Show when="signed-in">` / `<Show when="signed-out">` component.
 - Next.js 16 removed the `next lint` command entirely — use `"lint": "eslint ."` in package.json instead. The auto-generated `eslint.config.mjs` using `FlatCompat` will crash with "Converting circular structure to JSON" on `eslint-config-next`'s React hooks config — import `eslint-config-next/core-web-vitals` and `eslint-config-next/typescript` directly instead (native flat config, no FlatCompat needed).
 - Next.js 16 deprecated `middleware.ts` in favor of `proxy.ts` — same auth-protection logic, new file name/convention. Migrate with `npx @next/codemod@canary middleware-to-proxy .`
+## Data Conventions
+- Question.options: JSON array of strings, e.g. ["Option A", "Option B", "Option C", "Option D"]
+- Question.correctAnswer for MCQ: JSON number = index into options (e.g., 2)
+- Question.correctAnswer for MSQ: JSON array of numbers = indices into options (e.g., [0, 2])
+- Question.correctAnswer for NAT: not used — use natAnswer + natTolerance instead
