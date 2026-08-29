@@ -12,16 +12,178 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
 model Ping {
   id        String   @id @default(cuid())
   message   String
   createdAt DateTime @default(now())
 }
+
 model User {
-  id        String   @id @default(cuid())
-  clerkId   String   @unique
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String                @id @default(cuid())
+  clerkId         String                @unique
+  email           String                @unique
+  name            String?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  tests           Test[]
+  questionHistory UserQuestionHistory[]
+}
+
+model Subject {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  slug      String     @unique
+  order     Int        @default(0)
+  topics    Topic[]
+  questions Question[]
+  createdAt DateTime   @default(now())
+}
+
+model Topic {
+  id        String     @id @default(cuid())
+  name      String
+  slug      String
+  order     Int        @default(0)
+  subjectId String
+  subject   Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  questions Question[]
+  createdAt DateTime   @default(now())
+
+  @@unique([subjectId, slug])
+}
+
+enum QuestionType {
+  MCQ
+  MSQ
+  NAT
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  MEDIUM_HARD
+  HARD
+  VERY_HARD
+}
+
+enum QuestionStatus {
+  DRAFT
+  APPROVED
+  REJECTED
+}
+
+enum SourceType {
+  AI_GENERATED
+  OFFICIAL_PREVIOUS_YEAR
+  MANUAL
+}
+
+model Question {
+  id              String                @id @default(cuid())
+  questionText    String                @db.Text
+  questionType    QuestionType
+  subjectId       String
+  subject         Subject               @relation(fields: [subjectId], references: [id])
+  topicId         String
+  topic           Topic                 @relation(fields: [topicId], references: [id])
+  subtopic        String?
+  difficulty      Difficulty
+  marks           Int
+  options         Json?
+  correctAnswer   Json?
+  natAnswer       Float?
+  natTolerance    Float?
+  explanation     String                @db.Text
+  concept         String?
+  estimatedTime   Int?
+  sourceType      SourceType
+  sourceYear      Int?
+  sourceReference String?
+  tags            String[]
+  status          QuestionStatus        @default(DRAFT)
+  fingerprint     String                @unique
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  testQuestions   TestQuestion[]
+  userHistory     UserQuestionHistory[]
+
+  @@index([subjectId, topicId, difficulty, status])
+}
+
+enum TestType {
+  FULL_MOCK
+  SUBJECT_TEST
+  TOPIC_TEST
+  CUSTOM
+  PREVIOUS_YEAR
+  MISTAKE_REVISION
+  WEAK_TOPIC
+  QUICK_PRACTICE
+  AI_CHALLENGE
+}
+
+enum TestStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  SUBMITTED
+}
+
+model Test {
+  id            String         @id @default(cuid())
+  userId        String
+  user          User           @relation(fields: [userId], references: [id])
+  testType      TestType
+  title         String
+  durationMin   Int
+  questionCount Int
+  config        Json
+  status        TestStatus     @default(NOT_STARTED)
+  startedAt     DateTime?
+  submittedAt   DateTime?
+  score         Float?
+  maxMarks      Float?
+  accuracy      Float?
+  questions     TestQuestion[]
+  createdAt     DateTime       @default(now())
+
+  @@index([userId, status])
+}
+
+enum QuestionResult {
+  CORRECT
+  INCORRECT
+  SKIPPED
+  NOT_VISITED
+}
+
+model TestQuestion {
+  id             String          @id @default(cuid())
+  testId         String
+  test           Test            @relation(fields: [testId], references: [id], onDelete: Cascade)
+  questionId     String
+  question       Question        @relation(fields: [questionId], references: [id])
+  position       Int
+  userAnswer     Json?
+  isMarkedReview Boolean         @default(false)
+  isVisited      Boolean         @default(false)
+  timeSpentSec   Int             @default(0)
+  result         QuestionResult?
+
+  @@unique([testId, position])
+  @@index([questionId])
+}
+
+model UserQuestionHistory {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+  questionId      String
+  question        Question  @relation(fields: [questionId], references: [id])
+  attemptCount    Int       @default(0)
+  correctCount    Int       @default(0)
+  incorrectCount  Int       @default(0)
+  lastAttemptedAt DateTime?
+
+  @@unique([userId, questionId])
 }
