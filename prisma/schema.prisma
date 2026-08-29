@@ -187,3 +187,22 @@ model UserQuestionHistory {
 
   @@unique([userId, questionId])
 }
+model ExamRules {
+  id                    String   @id @default(cuid())
+  name                  String
+  year                  Int
+  isActive              Boolean  @default(false)
+  durationMin           Int
+  totalMarks            Int
+  gaMarks               Int
+  daMarks               Int
+  mcq1MarkWrongPenalty  Float
+  mcq2MarkWrongPenalty  Float
+  msqNegativeMarking    Boolean  @default(false)
+  natNegativeMarking    Boolean  @default(false)
+  fullMockQuestionCount Int
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([isActive])
+}
