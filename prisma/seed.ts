@@ -177,6 +177,58 @@ await seedSubject("Database Management and Warehousing", 5, [
   "Measure categorization",
   "Measure computations",
 ]);
+// Subject 6: Machine Learning
+await seedSubject("Machine Learning", 6, [
+  "Regression",
+  "Classification",
+  "Simple linear regression",
+  "Multiple linear regression",
+  "Ridge regression",
+  "Logistic regression",
+  "K-nearest neighbours",
+  "Naive Bayes",
+  "Linear discriminant analysis",
+  "Support vector machine",
+  "Decision trees",
+  "Bias-variance trade-off",
+  "Leave-one-out cross validation",
+  "K-fold cross validation",
+  "Multilayer perceptron",
+  "Feed-forward neural network",
+  "Clustering",
+  "K-means",
+  "K-medoids",
+  "Hierarchical clustering",
+  "Top-down clustering",
+  "Bottom-up clustering",
+  "Single linkage",
+  "Multiple linkage",
+  "Dimensionality reduction",
+  "PCA",
+]);
+
+// Subject 7: Artificial Intelligence
+await seedSubject("Artificial Intelligence", 7, [
+  "Uninformed search",
+  "Informed search",
+  "Adversarial search",
+  "Propositional logic",
+  "Predicate logic",
+  "Reasoning under uncertainty",
+  "Conditional independence representation",
+  "Variable elimination",
+  "Approximate inference through sampling",
+]);
+
+// Subject 8: General Aptitude
+await seedSubject("General Aptitude", 8, [
+  "Verbal aptitude",
+  "Quantitative aptitude",
+  "Logical reasoning",
+  "Numerical reasoning",
+  "Data interpretation",
+  "Basic analytical reasoning",
+]);
 
 
   console.log("Seed complete.");
