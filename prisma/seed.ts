@@ -46,6 +46,8 @@ async function seedExamRules() {
       totalMarks: 100,
       gaMarks: 15,
       daMarks: 85,
+      gaQuestionCount: 10,
+      daQuestionCount: 55,
       mcq1MarkWrongPenalty: 1 / 3,
       mcq2MarkWrongPenalty: 2 / 3,
       msqNegativeMarking: false,

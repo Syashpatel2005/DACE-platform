@@ -187,6 +187,7 @@ model UserQuestionHistory {
 
   @@unique([userId, questionId])
 }
+
 model ExamRules {
   id                    String   @id @default(cuid())
   name                  String
@@ -196,6 +197,8 @@ model ExamRules {
   totalMarks            Int
   gaMarks               Int
   daMarks               Int
+  gaQuestionCount       Int      @default(10)
+  daQuestionCount       Int      @default(55)
   mcq1MarkWrongPenalty  Float
   mcq2MarkWrongPenalty  Float
   msqNegativeMarking    Boolean  @default(false)

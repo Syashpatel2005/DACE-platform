@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "ExamRules" ADD COLUMN     "daQuestionCount" INTEGER NOT NULL DEFAULT 55,
+ADD COLUMN     "gaQuestionCount" INTEGER NOT NULL DEFAULT 10;
