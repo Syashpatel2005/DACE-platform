@@ -6,12 +6,30 @@
   --color-brand-blue: #1e3a8a;
   --color-brand-blue-light: #3b82f6;
 
-  /* Semantic tokens - these are what you'll actually use everywhere */
   --color-surface: #ffffff;
   --color-surface-muted: #f8fafc;
   --color-border-default: #e2e8f0;
   --color-text-primary: #0f1e3d;
   --color-text-secondary: #475569;
+
+  --color-background: #ffffff;
+  --color-foreground: #0f1e3d;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #0f1e3d;
+  --color-muted: #f8fafc;
+  --color-muted-foreground: #475569;
+  --color-accent: #f1f5f9;
+  --color-accent-foreground: #0f1e3d;
+  --color-border: #e2e8f0;
+  --color-input: #e2e8f0;
+  --color-ring: #1e3a8a;
+  --color-destructive: #dc2626;
+
+  /* Missing pieces — add these */
+  --color-primary: #1e3a8a;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #f1f5f9;
+  --color-secondary-foreground: #0f1e3d;
 }
 
 .dark {
@@ -20,4 +38,23 @@
   --color-border-default: #334155;
   --color-text-primary: #f8fafc;
   --color-text-secondary: #cbd5e1;
+
+  --color-background: #0f172a;
+  --color-foreground: #f8fafc;
+  --color-popover: #1e293b;
+  --color-popover-foreground: #f8fafc;
+  --color-muted: #1e293b;
+  --color-muted-foreground: #cbd5e1;
+  --color-accent: #334155;
+  --color-accent-foreground: #f8fafc;
+  --color-border: #334155;
+  --color-input: #334155;
+  --color-ring: #3b82f6;
+  --color-destructive: #ef4444;
+
+  /* Missing pieces — add these */
+  --color-primary: #3b82f6;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #334155;
+  --color-secondary-foreground: #f8fafc;
 }
