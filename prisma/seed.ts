@@ -121,6 +121,63 @@ async function main() {
     "LU decomposition",
     "Singular Value Decomposition",
   ]);
+  // Subject 3: Calculus and Optimization
+await seedSubject("Calculus and Optimization", 3, [
+  "Functions of a single variable",
+  "Limits",
+  "Continuity",
+  "Differentiability",
+  "Taylor series",
+  "Maxima",
+  "Minima",
+  "Single-variable optimization",
+]);
+
+// Subject 4: Programming, Data Structures and Algorithms
+await seedSubject("Programming, Data Structures and Algorithms", 4, [
+  "Python",
+  "Stack",
+  "Queue",
+  "Linked list",
+  "Trees",
+  "Hash tables",
+  "Linear search",
+  "Binary search",
+  "Selection sort",
+  "Bubble sort",
+  "Insertion sort",
+  "Merge sort",
+  "Quick sort",
+  "Basic graph theory",
+  "Graph traversal",
+  "Shortest path algorithms",
+]);
+
+// Subject 5: Database Management and Warehousing
+await seedSubject("Database Management and Warehousing", 5, [
+  "ER model",
+  "Relational model",
+  "Relational algebra",
+  "Tuple calculus",
+  "SQL",
+  "Integrity constraints",
+  "Normal forms",
+  "File organization",
+  "Indexing",
+  "Data types",
+  "Data transformation",
+  "Normalization",
+  "Discretization",
+  "Sampling",
+  "Compression",
+  "Data warehouse modelling",
+  "Multidimensional data models",
+  "Concept hierarchies",
+  "Measures",
+  "Measure categorization",
+  "Measure computations",
+]);
+
 
   console.log("Seed complete.");
 }
