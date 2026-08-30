@@ -28,3 +28,15 @@ export type TopicsResponse =
 export type SyllabusResponse =
   | { success: true; syllabus: SubjectWithTopics[] }
   | { success: false; error: string };
+export type GenerateTestInput = {
+  testType: "FULL_MOCK" | "SUBJECT_TEST" | "TOPIC_TEST" | "CUSTOM" | "QUICK_PRACTICE";
+  subjectIds: string[];
+  topicIds?: string[];
+  questionCount: number;
+  durationMin: number;
+  difficulty?: "EASY" | "MEDIUM" | "MEDIUM_HARD" | "HARD" | "VERY_HARD";
+};
+
+export type GenerateTestResponse =
+  | { success: true; testId: string; actualQuestionCount: number }
+  | { success: false; error: string };
