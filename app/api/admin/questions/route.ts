@@ -3,6 +3,36 @@ import { prisma } from "@/lib/prisma";
 import { generateFingerprint } from "@/lib/fingerprint";
 import { validateMCQ, type MCQInput } from "@/lib/questionValidation";
 
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const subjectId = searchParams.get("subjectId");
+    const topicId = searchParams.get("topicId");
+    const difficulty = searchParams.get("difficulty");
+
+    const questions = await prisma.question.findMany({
+      where: {
+        ...(subjectId ? { subjectId } : {}),
+        ...(topicId ? { topicId } : {}),
+        ...(difficulty ? { difficulty: difficulty as never } : {}),
+      },
+      orderBy: { createdAt: "desc" },
+      include: {
+        subject: { select: { name: true } },
+        topic: { select: { name: true } },
+      },
+    });
+
+    return NextResponse.json({ success: true, questions });
+  } catch (error) {
+    console.error("Failed to fetch questions:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to fetch questions" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const body: MCQInput = await request.json();
