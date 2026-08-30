@@ -36,7 +36,7 @@ export default async function QuestionsListPage({
   ]);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex min-w-0 flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Question Bank</h1>
@@ -46,7 +46,7 @@ export default async function QuestionsListPage({
         </div>
         <Link
           href="/dashboard/admin/questions/new"
-          className="rounded-md bg-brand-blue px-4 py-2 text-sm font-medium text-white hover:bg-brand-navy"
+          className="shrink-0 rounded-md bg-brand-blue px-4 py-2 text-sm font-medium text-white hover:bg-brand-navy"
         >
           Add Question
         </Link>
@@ -54,46 +54,56 @@ export default async function QuestionsListPage({
 
       <QuestionFilters subjects={subjects} topics={topics} />
 
-      <div className="overflow-x-auto rounded-lg border border-border-default bg-surface">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Question</TableHead>
-              <TableHead>Subject</TableHead>
-              <TableHead>Topic</TableHead>
-              <TableHead>Difficulty</TableHead>
-              <TableHead>Marks</TableHead>
-              <TableHead>Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {questions.map((q) => (
-              <TableRow key={q.id}>
-                <TableCell className="max-w-md truncate text-text-primary">
-                  {q.questionText}
-                </TableCell>
-                <TableCell className="text-text-secondary">{q.subject.name}</TableCell>
-                <TableCell className="text-text-secondary">{q.topic.name}</TableCell>
-                <TableCell>
-                  <Badge variant="outline">{q.difficulty.replace("_", "-")}</Badge>
-                </TableCell>
-                <TableCell className="text-text-secondary">{q.marks}</TableCell>
-                <TableCell>
-                  <Badge variant={q.status === "APPROVED" ? "default" : "secondary"}>
-                    {q.status}
-                  </Badge>
-                </TableCell>
-              </TableRow>
-            ))}
-            {questions.length === 0 && (
+      {/* This wrapper is the ONLY thing that scrolls horizontally — not the page */}
+      <div className="min-w-0 overflow-hidden rounded-lg border border-border-default bg-surface">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-text-secondary">
-                  No questions match the current filters.
-                </TableCell>
+                <TableHead className="min-w-[280px]">Question</TableHead>
+                <TableHead className="min-w-[160px]">Subject</TableHead>
+                <TableHead className="min-w-[160px]">Topic</TableHead>
+                <TableHead className="min-w-[110px]">Difficulty</TableHead>
+                <TableHead className="min-w-[70px]">Marks</TableHead>
+                <TableHead className="min-w-[100px]">Status</TableHead>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {questions.map((q) => (
+                <TableRow key={q.id}>
+                  <TableCell
+                    className="max-w-[320px] truncate text-text-primary"
+                    title={q.questionText}
+                  >
+                    {q.questionText}
+                  </TableCell>
+                  <TableCell className="text-text-secondary whitespace-nowrap">
+                    {q.subject.name}
+                  </TableCell>
+                  <TableCell className="text-text-secondary whitespace-nowrap">
+                    {q.topic.name}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    <Badge variant="outline">{q.difficulty.replace("_", "-")}</Badge>
+                  </TableCell>
+                  <TableCell className="text-text-secondary">{q.marks}</TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    <Badge variant={q.status === "APPROVED" ? "default" : "secondary"}>
+                      {q.status}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {questions.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center text-text-secondary">
+                    No questions match the current filters.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   );
