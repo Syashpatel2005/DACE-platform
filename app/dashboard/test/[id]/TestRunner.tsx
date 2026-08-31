@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import MathText from "@/app/components/MathText";
@@ -35,7 +35,10 @@ export default function TestRunner({
   const [current, setCurrent] = useState<TestQuestionData | null>(null);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [started, setStarted] = useState(initialStatus === "IN_PROGRESS");
+
+  const questionStartTime = useRef<number>(0);
 
   const fetchQuestion = useCallback(
     async (position: number) => {
@@ -47,9 +50,34 @@ export default function TestRunner({
         setSelectedOption(data.testQuestion.userAnswer);
       }
       setLoading(false);
+      questionStartTime.current = Date.now();
     },
     [testId]
   );
+
+  async function saveCurrentAnswer(answerOverride?: number | null) {
+    if (!current) return;
+
+    const timeSpentSec = Math.round((Date.now() - questionStartTime.current) / 1000);
+    const answerToSave = answerOverride !== undefined ? answerOverride : selectedOption;
+
+    setSaving(true);
+    await fetch(`/api/tests/${testId}/answer`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        position: current.position,
+        answer: answerToSave,
+        timeSpentSec,
+      }),
+    });
+    setSaving(false);
+  }
+
+  async function goToPosition(position: number) {
+    await saveCurrentAnswer();
+    setCurrentPosition(position);
+  }
 
   async function startTest() {
     setLoading(true);
@@ -61,12 +89,30 @@ export default function TestRunner({
     setLoading(false);
   }
 
-    useEffect(() => {
+  useEffect(() => {
     if (started) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- refetching question data when position/started changes is the correct pattern here
-        fetchQuestion(currentPosition);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- refetching question data when position/started changes is the correct pattern here
+      fetchQuestion(currentPosition);
     }
-    }, [started, currentPosition, fetchQuestion]);
+  }, [started, currentPosition, fetchQuestion]);
+
+  // Save on tab close / browser navigation away, best-effort
+  useEffect(() => {
+    function handleBeforeUnload() {
+      if (current) {
+        const timeSpentSec = Math.round((Date.now() - questionStartTime.current) / 1000);
+        navigator.sendBeacon(
+          `/api/tests/${testId}/answer`,
+          new Blob(
+            [JSON.stringify({ position: current.position, answer: selectedOption, timeSpentSec })],
+            { type: "application/json" }
+          )
+        );
+      }
+    }
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [current, selectedOption, testId]);
 
   if (!started) {
     return (
@@ -87,7 +133,10 @@ export default function TestRunner({
     <div className="mx-auto flex max-w-3xl flex-col gap-6 p-6">
       <div className="flex items-center justify-between text-sm text-text-secondary">
         <span>Question {current.position} of {questionCount}</span>
-        <span>{current.question.marks} mark{current.question.marks !== 1 ? "s" : ""}</span>
+        <span className="flex items-center gap-3">
+          {saving && <span className="text-xs italic">Saving...</span>}
+          <span>{current.question.marks} mark{current.question.marks !== 1 ? "s" : ""}</span>
+        </span>
       </div>
 
       <Card>
@@ -124,16 +173,16 @@ export default function TestRunner({
         <Button
           variant="outline"
           disabled={currentPosition <= 1}
-          onClick={() => setCurrentPosition((p) => p - 1)}
+          onClick={() => goToPosition(currentPosition - 1)}
         >
           Previous
         </Button>
         <Button
           disabled={currentPosition >= questionCount}
-          onClick={() => setCurrentPosition((p) => p + 1)}
+          onClick={() => goToPosition(currentPosition + 1)}
           className="bg-brand-blue hover:bg-brand-navy"
         >
-          Next
+          Save & Next
         </Button>
       </div>
     </div>
