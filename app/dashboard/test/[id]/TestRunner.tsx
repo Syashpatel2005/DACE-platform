@@ -73,6 +73,10 @@ export default function TestRunner({
     });
     setSaving(false);
   }
+  async function clearResponse() {
+  setSelectedOption(null);
+  await saveCurrentAnswer(null);
+}
 
   async function goToPosition(position: number) {
     await saveCurrentAnswer();
@@ -169,22 +173,32 @@ export default function TestRunner({
         </CardContent>
       </Card>
 
-      <div className="flex justify-between">
+      <div className="flex items-center justify-between">
         <Button
-          variant="outline"
-          disabled={currentPosition <= 1}
-          onClick={() => goToPosition(currentPosition - 1)}
+            variant="outline"
+            disabled={currentPosition <= 1}
+            onClick={() => goToPosition(currentPosition - 1)}
         >
-          Previous
+            Previous
         </Button>
+
         <Button
-          disabled={currentPosition >= questionCount}
-          onClick={() => goToPosition(currentPosition + 1)}
-          className="bg-brand-blue hover:bg-brand-navy"
+            variant="ghost"
+            disabled={selectedOption === null}
+            onClick={clearResponse}
+            className="text-text-secondary hover:text-destructive"
         >
-          Save & Next
+            Clear Response
         </Button>
-      </div>
+
+        <Button
+            disabled={currentPosition >= questionCount}
+            onClick={() => goToPosition(currentPosition + 1)}
+            className="bg-brand-blue hover:bg-brand-navy"
+        >
+            Save & Next
+        </Button>
+        </div>
     </div>
   );
 }
