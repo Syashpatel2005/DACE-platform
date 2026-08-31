@@ -40,3 +40,12 @@ export type GenerateTestInput = {
 export type GenerateTestResponse =
   | { success: true; testId: string; actualQuestionCount: number }
   | { success: false; error: string };
+export type SaveAnswerInput = {
+  position: number;
+  answer: number | number[] | null;
+  timeSpentSec?: number;
+};
+
+export type SaveAnswerResponse =
+  | { success: true }
+  | { success: false; error: string };
