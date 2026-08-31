@@ -7,6 +7,7 @@ import type { GenerateTestInput, GenerateTestResponse } from "@/lib/types";
 export async function POST(request: Request) {
   try {
     const { userId: clerkId } = await auth();
+    
     if (!clerkId) {
       return NextResponse.json(
         { success: false, error: "Not authenticated" } satisfies GenerateTestResponse,

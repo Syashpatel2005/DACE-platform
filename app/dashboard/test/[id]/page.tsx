@@ -18,5 +18,13 @@ export default async function TestPage({
   const test = await prisma.test.findUnique({ where: { id: testId } });
   if (!test || test.userId !== user.id) notFound();
 
-  return <TestRunner testId={testId} initialStatus={test.status} durationMin={test.durationMin} questionCount={test.questionCount} />;
+  return (
+    <TestRunner
+      testId={testId}
+      initialStatus={test.status}
+      durationMin={test.durationMin}
+      questionCount={test.questionCount}
+      startedAt={test.startedAt?.toISOString() ?? null}
+    />
+  );
 }

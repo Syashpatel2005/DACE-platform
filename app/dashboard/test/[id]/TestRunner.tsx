@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import MathText from "@/app/components/MathText";
+import Timer from "./Timer";
 
 type QuestionData = {
   id: string;
@@ -25,18 +26,24 @@ export default function TestRunner({
   testId,
   initialStatus,
   questionCount,
+  durationMin,
+  startedAt: initialStartedAt,
 }: {
   testId: string;
   initialStatus: string;
   durationMin: number;
   questionCount: number;
+  startedAt: string | null;
 }) {
   const [currentPosition, setCurrentPosition] = useState(1);
   const [current, setCurrent] = useState<TestQuestionData | null>(null);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [started, setStarted] = useState(initialStatus === "IN_PROGRESS");
+  const [started, setStarted] = useState(
+    initialStatus === "IN_PROGRESS" && initialStartedAt !== null
+  );
+  const [startedAt, setStartedAt] = useState<string | null>(initialStartedAt);
 
   const questionStartTime = useRef<number>(0);
 
@@ -73,14 +80,15 @@ export default function TestRunner({
     });
     setSaving(false);
   }
-  async function clearResponse() {
-  setSelectedOption(null);
-  await saveCurrentAnswer(null);
-}
 
   async function goToPosition(position: number) {
     await saveCurrentAnswer();
     setCurrentPosition(position);
+  }
+
+  async function clearResponse() {
+    setSelectedOption(null);
+    await saveCurrentAnswer(null);
   }
 
   async function startTest() {
@@ -89,8 +97,14 @@ export default function TestRunner({
     const data = await res.json();
     if (data.success) {
       setStarted(true);
+      setStartedAt(data.test.startedAt);
     }
     setLoading(false);
+  }
+
+  function handleExpire() {
+    // Auto-submit logic comes in Day 49 - for now, just log
+    console.log("Time expired - auto-submit will be wired on Day 49");
   }
 
   useEffect(() => {
@@ -135,12 +149,18 @@ export default function TestRunner({
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6 p-6">
-      <div className="flex items-center justify-between text-sm text-text-secondary">
-        <span>Question {current.position} of {questionCount}</span>
-        <span className="flex items-center gap-3">
-          {saving && <span className="text-xs italic">Saving...</span>}
-          <span>{current.question.marks} mark{current.question.marks !== 1 ? "s" : ""}</span>
+      <div className="flex items-center justify-between">
+        <span className="text-sm text-text-secondary">
+          Question {current.position} of {questionCount}
         </span>
+        {startedAt && (
+          <Timer startedAt={startedAt} durationMin={durationMin} onExpire={handleExpire} />
+        )}
+      </div>
+
+      <div className="flex items-center justify-between text-sm text-text-secondary">
+        <span>{saving && <span className="text-xs italic">Saving...</span>}</span>
+        <span>{current.question.marks} mark{current.question.marks !== 1 ? "s" : ""}</span>
       </div>
 
       <Card>
@@ -175,30 +195,30 @@ export default function TestRunner({
 
       <div className="flex items-center justify-between">
         <Button
-            variant="outline"
-            disabled={currentPosition <= 1}
-            onClick={() => goToPosition(currentPosition - 1)}
+          variant="outline"
+          disabled={currentPosition <= 1}
+          onClick={() => goToPosition(currentPosition - 1)}
         >
-            Previous
+          Previous
         </Button>
 
         <Button
-            variant="ghost"
-            disabled={selectedOption === null}
-            onClick={clearResponse}
-            className="text-text-secondary hover:text-destructive"
+          variant="ghost"
+          disabled={selectedOption === null}
+          onClick={clearResponse}
+          className="text-text-secondary hover:text-destructive"
         >
-            Clear Response
+          Clear Response
         </Button>
 
         <Button
-            disabled={currentPosition >= questionCount}
-            onClick={() => goToPosition(currentPosition + 1)}
-            className="bg-brand-blue hover:bg-brand-navy"
+          disabled={currentPosition >= questionCount}
+          onClick={() => goToPosition(currentPosition + 1)}
+          className="bg-brand-blue hover:bg-brand-navy"
         >
-            Save & Next
+          Save & Next
         </Button>
-        </div>
+      </div>
     </div>
   );
 }
