@@ -1,9 +1,9 @@
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import TestRunner from "./TestRunner";
+import ResultView from "./ResultView";
 
-export default async function TestPage({
+export default async function TestResultPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -18,17 +18,9 @@ export default async function TestPage({
   const test = await prisma.test.findUnique({ where: { id: testId } });
   if (!test || test.userId !== user.id) notFound();
 
-  if (test.status === "SUBMITTED") {
-    redirect(`/dashboard/test/${testId}/result`);
+  if (test.status !== "SUBMITTED") {
+    redirect(`/dashboard/test/${testId}`);
   }
 
-  return (
-    <TestRunner
-      testId={testId}
-      initialStatus={test.status}
-      durationMin={test.durationMin}
-      questionCount={test.questionCount}
-      startedAt={test.startedAt?.toISOString() ?? null}
-    />
-  );
+  return <ResultView testId={testId} />;
 }

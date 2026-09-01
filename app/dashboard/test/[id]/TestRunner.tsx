@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import MathText from "@/app/components/MathText";
@@ -22,14 +23,6 @@ type TestQuestionData = {
   question: QuestionData;
 };
 
-type SubmitSummary = {
-  score: number;
-  maxMarks: number;
-  correct: number;
-  incorrect: number;
-  skipped: number;
-};
-
 export default function TestRunner({
   testId,
   initialStatus,
@@ -43,6 +36,8 @@ export default function TestRunner({
   questionCount: number;
   startedAt: string | null;
 }) {
+  const router = useRouter();
+
   const [currentPosition, setCurrentPosition] = useState(1);
   const [current, setCurrent] = useState<TestQuestionData | null>(null);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -52,10 +47,7 @@ export default function TestRunner({
     initialStatus === "IN_PROGRESS" && initialStartedAt !== null
   );
   const [startedAt, setStartedAt] = useState<string | null>(initialStartedAt);
-
   const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(initialStatus === "SUBMITTED");
-  const [summary, setSummary] = useState<SubmitSummary | null>(null);
 
   const questionStartTime = useRef<number>(0);
 
@@ -115,18 +107,18 @@ export default function TestRunner({
   }
 
   async function submitTest() {
-    if (submitted || submitting) return;
+    if (submitting) return;
 
     await saveCurrentAnswer();
 
     setSubmitting(true);
     const res = await fetch(`/api/tests/${testId}/submit`, { method: "POST" });
     const data = await res.json();
-    setSubmitting(false);
 
     if (data.success) {
-      setSubmitted(true);
-      setSummary(data.summary);
+      router.push(`/dashboard/test/${testId}/result`);
+    } else {
+      setSubmitting(false);
     }
   }
 
@@ -135,16 +127,16 @@ export default function TestRunner({
   }
 
   useEffect(() => {
-    if (started && !submitted) {
+    if (started) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- refetching question data when position/started changes is the correct pattern here
       fetchQuestion(currentPosition);
     }
-  }, [started, submitted, currentPosition, fetchQuestion]);
+  }, [started, currentPosition, fetchQuestion]);
 
   // Save on tab close / browser navigation away, best-effort
   useEffect(() => {
     function handleBeforeUnload() {
-      if (current && !submitted) {
+      if (current) {
         const timeSpentSec = Math.round((Date.now() - questionStartTime.current) / 1000);
         navigator.sendBeacon(
           `/api/tests/${testId}/answer`,
@@ -157,37 +149,7 @@ export default function TestRunner({
     }
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [current, selectedOption, testId, submitted]);
-
-  if (submitted && summary) {
-    return (
-      <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
-        <h2 className="text-2xl font-bold text-text-primary">Test Submitted</h2>
-        <p className="text-4xl font-bold text-brand-blue">
-          {summary.score} / {summary.maxMarks}
-        </p>
-        <div className="flex gap-6 text-sm text-text-secondary">
-          <span>Correct: {summary.correct}</span>
-          <span>Incorrect: {summary.incorrect}</span>
-          <span>Skipped: {summary.skipped}</span>
-        </div>
-        <p className="text-xs text-text-secondary">
-          Full result analysis page coming Day 51.
-        </p>
-      </div>
-    );
-  }
-
-  if (submitted && !summary) {
-    return (
-      <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
-        <h2 className="text-2xl font-bold text-text-primary">Test Already Submitted</h2>
-        <p className="text-text-secondary">
-          This test was already submitted. Result view coming Day 51.
-        </p>
-      </div>
-    );
-  }
+  }, [current, selectedOption, testId]);
 
   if (!started) {
     return (
