@@ -22,6 +22,14 @@ type TestQuestionData = {
   question: QuestionData;
 };
 
+type SubmitSummary = {
+  score: number;
+  maxMarks: number;
+  correct: number;
+  incorrect: number;
+  skipped: number;
+};
+
 export default function TestRunner({
   testId,
   initialStatus,
@@ -44,6 +52,10 @@ export default function TestRunner({
     initialStatus === "IN_PROGRESS" && initialStartedAt !== null
   );
   const [startedAt, setStartedAt] = useState<string | null>(initialStartedAt);
+
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(initialStatus === "SUBMITTED");
+  const [summary, setSummary] = useState<SubmitSummary | null>(null);
 
   const questionStartTime = useRef<number>(0);
 
@@ -102,22 +114,37 @@ export default function TestRunner({
     setLoading(false);
   }
 
+  async function submitTest() {
+    if (submitted || submitting) return;
+
+    await saveCurrentAnswer();
+
+    setSubmitting(true);
+    const res = await fetch(`/api/tests/${testId}/submit`, { method: "POST" });
+    const data = await res.json();
+    setSubmitting(false);
+
+    if (data.success) {
+      setSubmitted(true);
+      setSummary(data.summary);
+    }
+  }
+
   function handleExpire() {
-    // Auto-submit logic comes in Day 49 - for now, just log
-    console.log("Time expired - auto-submit will be wired on Day 49");
+    submitTest();
   }
 
   useEffect(() => {
-    if (started) {
+    if (started && !submitted) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- refetching question data when position/started changes is the correct pattern here
       fetchQuestion(currentPosition);
     }
-  }, [started, currentPosition, fetchQuestion]);
+  }, [started, submitted, currentPosition, fetchQuestion]);
 
   // Save on tab close / browser navigation away, best-effort
   useEffect(() => {
     function handleBeforeUnload() {
-      if (current) {
+      if (current && !submitted) {
         const timeSpentSec = Math.round((Date.now() - questionStartTime.current) / 1000);
         navigator.sendBeacon(
           `/api/tests/${testId}/answer`,
@@ -130,7 +157,37 @@ export default function TestRunner({
     }
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [current, selectedOption, testId]);
+  }, [current, selectedOption, testId, submitted]);
+
+  if (submitted && summary) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
+        <h2 className="text-2xl font-bold text-text-primary">Test Submitted</h2>
+        <p className="text-4xl font-bold text-brand-blue">
+          {summary.score} / {summary.maxMarks}
+        </p>
+        <div className="flex gap-6 text-sm text-text-secondary">
+          <span>Correct: {summary.correct}</span>
+          <span>Incorrect: {summary.incorrect}</span>
+          <span>Skipped: {summary.skipped}</span>
+        </div>
+        <p className="text-xs text-text-secondary">
+          Full result analysis page coming Day 51.
+        </p>
+      </div>
+    );
+  }
+
+  if (submitted && !summary) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
+        <h2 className="text-2xl font-bold text-text-primary">Test Already Submitted</h2>
+        <p className="text-text-secondary">
+          This test was already submitted. Result view coming Day 51.
+        </p>
+      </div>
+    );
+  }
 
   if (!started) {
     return (
@@ -211,13 +268,22 @@ export default function TestRunner({
           Clear Response
         </Button>
 
-        <Button
-          disabled={currentPosition >= questionCount}
-          onClick={() => goToPosition(currentPosition + 1)}
-          className="bg-brand-blue hover:bg-brand-navy"
-        >
-          Save & Next
-        </Button>
+        {currentPosition >= questionCount ? (
+          <Button
+            disabled={submitting}
+            onClick={submitTest}
+            className="bg-brand-blue hover:bg-brand-navy"
+          >
+            {submitting ? "Submitting..." : "Submit Test"}
+          </Button>
+        ) : (
+          <Button
+            onClick={() => goToPosition(currentPosition + 1)}
+            className="bg-brand-blue hover:bg-brand-navy"
+          >
+            Save & Next
+          </Button>
+        )}
       </div>
     </div>
   );
