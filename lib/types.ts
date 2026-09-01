@@ -44,6 +44,7 @@ export type SaveAnswerInput = {
   position: number;
   answer: number | number[] | null;
   timeSpentSec?: number;
+  isMarkedReview?: boolean;
 };
 
 export type SaveAnswerResponse =

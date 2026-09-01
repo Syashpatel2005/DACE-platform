@@ -47,15 +47,16 @@ export async function POST(
       );
     }
 
-    await prisma.testQuestion.update({
-      where: { id: testQuestion.id },
-      data: {
-        userAnswer: body.answer === null ? Prisma.JsonNull : body.answer,
-        ...(body.timeSpentSec !== undefined
-          ? { timeSpentSec: { increment: body.timeSpentSec } }
-          : {}),
-      },
-    });
+  await prisma.testQuestion.update({
+    where: { id: testQuestion.id },
+    data: {
+      userAnswer: body.answer === null ? Prisma.JsonNull : body.answer,
+      ...(body.timeSpentSec !== undefined
+        ? { timeSpentSec: { increment: body.timeSpentSec } }
+        : {}),
+      ...(body.isMarkedReview !== undefined ? { isMarkedReview: body.isMarkedReview } : {}),
+    },
+  });
 
     return NextResponse.json({ success: true } satisfies SaveAnswerResponse);
   } catch (error) {
