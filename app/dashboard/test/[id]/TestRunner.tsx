@@ -184,8 +184,7 @@ export default function TestRunner({
   useEffect(() => {
     if (started) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- refetching question data when position/started changes is the correct pattern here
-      fetchQuestion(currentPosition);
-      fetchPalette();
+      fetchQuestion(currentPosition).then(() => fetchPalette());
     }
   }, [started, currentPosition, fetchQuestion, fetchPalette]);
 
