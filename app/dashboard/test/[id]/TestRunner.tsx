@@ -63,6 +63,7 @@ export default function TestRunner({
   );
   const [startedAt, setStartedAt] = useState<string | null>(initialStartedAt);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [palette, setPalette] = useState<PaletteItem[]>([]);
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
   const [timeRemainingSec, setTimeRemainingSec] = useState(0);
@@ -142,6 +143,15 @@ export default function TestRunner({
     }
   }
 
+  function goToNextMarked() {
+    const marked = palette.filter((p) => p.isMarkedReview);
+    const next = marked.find((p) => p.position > currentPosition);
+    const target = next ?? marked[0];
+    if (target) {
+      goToPosition(target.position);
+    }
+  }
+
   async function startTest() {
     setLoading(true);
     const res = await fetch(`/api/tests/${testId}/start`, { method: "POST" });
@@ -152,8 +162,6 @@ export default function TestRunner({
     }
     setLoading(false);
   }
-
-  const [submitError, setSubmitError] = useState<string | null>(null);
 
   async function submitTest() {
     if (submitting) return;
@@ -181,14 +189,6 @@ export default function TestRunner({
 
   function handleExpire() {
     submitTest();
-  }
-  function goToNextMarked() {
-  const marked = palette.filter((p) => p.isMarkedReview);
-  const next = marked.find((p) => p.position > currentPosition);
-  const target = next ?? marked[0];
-  if (target) {
-    goToPosition(target.position);
-  }
   }
 
   useEffect(() => {
@@ -226,7 +226,6 @@ export default function TestRunner({
     );
   }
 
-
   return (
     <div className="flex flex-col gap-6 p-6 lg:flex-row">
       <aside className="w-full shrink-0 rounded-lg border border-border-default bg-surface p-4 lg:w-64">
@@ -256,31 +255,21 @@ export default function TestRunner({
           </Button>
         )}
       </aside>
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
-            {submitError && (
-              <div className="rounded-md border border-destructive bg-destructive/10 p-4 text-sm text-destructive">
-                <p className="font-medium">{submitError}</p>
-                <Button
-                  size="sm"
-                  onClick={submitTest}
-                  className="mt-2 bg-destructive text-white hover:bg-destructive/90"
-                >
-                  Retry Submit
-                </Button>
-              </div>
-            )}
 
-        {loading || !current ? (
-          <div className="flex min-h-[300px] items-center justify-center text-text-secondary">
-            Loading question...
-          </div>
-        ) : (
-          <>
-            {/* ... existing question card and buttons ... */}
-          </>
-        )}
-      </div>
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
+        {submitError && (
+          <div className="rounded-md border border-destructive bg-destructive/10 p-4 text-sm text-destructive">
+            <p className="font-medium">{submitError}</p>
+            <Button
+              size="sm"
+              onClick={submitTest}
+              className="mt-2 bg-destructive text-white hover:bg-destructive/90"
+            >
+              Retry Submit
+            </Button>
+          </div>
+        )}
+
         {loading || !current ? (
           <div className="flex min-h-[300px] items-center justify-center text-text-secondary">
             Loading question...
