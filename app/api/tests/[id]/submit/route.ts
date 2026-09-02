@@ -38,9 +38,8 @@ export async function POST(
       include: { question: { select: { correctAnswer: true, marks: true, questionType: true } } },
     });
 
-    const updates = testQuestions.map((tq) => {
+    const withResults = testQuestions.map((tq) => {
       let result: "CORRECT" | "INCORRECT" | "SKIPPED";
-
       if (tq.userAnswer === null) {
         result = "SKIPPED";
       } else if (tq.userAnswer === tq.question.correctAnswer) {
@@ -48,14 +47,27 @@ export async function POST(
       } else {
         result = "INCORRECT";
       }
-
-      return prisma.testQuestion.update({
-        where: { id: tq.id },
-        data: { result },
-      });
+      return { ...tq, result };
     });
 
-    const updatedQuestions = await prisma.$transaction(updates);
+    // Group by result so we can update each group in a single query instead of
+    // one query per question - much faster and avoids transaction timeouts.
+    const idsByResult = {
+      CORRECT: withResults.filter((tq) => tq.result === "CORRECT").map((tq) => tq.id),
+      INCORRECT: withResults.filter((tq) => tq.result === "INCORRECT").map((tq) => tq.id),
+      SKIPPED: withResults.filter((tq) => tq.result === "SKIPPED").map((tq) => tq.id),
+    };
+
+    await Promise.all(
+      (Object.entries(idsByResult) as [keyof typeof idsByResult, string[]][])
+        .filter(([, ids]) => ids.length > 0)
+        .map(([result, ids]) =>
+          prisma.testQuestion.updateMany({
+            where: { id: { in: ids } },
+            data: { result },
+          })
+        )
+    );
 
     const activeRules = await prisma.examRules.findFirst({ where: { isActive: true } });
     if (!activeRules) {
@@ -66,10 +78,10 @@ export async function POST(
     }
 
     const scoreSummary = calculateScore(
-      testQuestions.map((tq, i) => ({
+      withResults.map((tq) => ({
         marks: tq.question.marks,
         questionType: tq.question.questionType,
-        result: updatedQuestions[i].result,
+        result: tq.result,
       })),
       activeRules
     );

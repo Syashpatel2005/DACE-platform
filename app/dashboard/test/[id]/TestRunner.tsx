@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import MathText from "@/app/components/MathText";
 import Timer from "./Timer";
 import QuestionPalette from "./QuestionPalette";
+import SubmitConfirmDialog from "./SubmitConfirmDialog";
 
 type QuestionData = {
   id: string;
@@ -45,6 +46,8 @@ export default function TestRunner({
   startedAt: string | null;
 }) {
   const router = useRouter();
+  const [showSubmitDialog, setShowSubmitDialog] = useState(false);
+  const [timeRemainingSec, setTimeRemainingSec] = useState(0);
 
   const [currentPosition, setCurrentPosition] = useState(1);
   const [current, setCurrent] = useState<TestQuestionData | null>(null);
@@ -163,6 +166,11 @@ export default function TestRunner({
   function handleExpire() {
     submitTest();
   }
+  function formatRemaining(sec: number): string {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
 
   useEffect(() => {
     if (started) {
@@ -208,14 +216,25 @@ export default function TestRunner({
     <div className="flex flex-col gap-6 p-6 lg:flex-row">
       <aside className="w-full shrink-0 rounded-lg border border-border-default bg-surface p-4 lg:w-64">
         {startedAt && (
-          <div className="mb-4">
-            <Timer startedAt={startedAt} durationMin={durationMin} onExpire={handleExpire} />
-          </div>
+          <Timer
+            startedAt={startedAt}
+            durationMin={durationMin}
+            onExpire={handleExpire}
+            onTick={setTimeRemainingSec}
+          />
         )}
         <QuestionPalette
           palette={palette}
           currentPosition={currentPosition}
           onNavigate={(pos) => goToPosition(pos)}
+        />
+        <SubmitConfirmDialog
+          open={showSubmitDialog}
+          onOpenChange={setShowSubmitDialog}
+          palette={palette}
+          timeRemainingLabel={formatRemaining(timeRemainingSec)}
+          onConfirm={submitTest}
+          submitting={submitting}
         />
       </aside>
 
@@ -261,10 +280,10 @@ export default function TestRunner({
         <div className="flex flex-wrap items-center justify-between gap-2">
           <Button
             variant="outline"
-            disabled={currentPosition <= 1}
-            onClick={() => goToPosition(currentPosition - 1)}
+            onClick={() => setShowSubmitDialog(true)}
+            className="border-destructive text-destructive hover:bg-destructive/10"
           >
-            Previous
+            Submit Test
           </Button>
 
           <Button

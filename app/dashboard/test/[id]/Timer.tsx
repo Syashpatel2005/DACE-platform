@@ -17,10 +17,12 @@ export default function Timer({
   startedAt,
   durationMin,
   onExpire,
+  onTick,
 }: {
   startedAt: string;
   durationMin: number;
   onExpire: () => void;
+  onTick?: (remainingSec: number) => void;
 }) {
   const endTime = new Date(startedAt).getTime() + durationMin * 60 * 1000;
   const [remainingSec, setRemainingSec] = useState(() =>
@@ -32,6 +34,7 @@ export default function Timer({
     const interval = setInterval(() => {
       const remaining = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
       setRemainingSec(remaining);
+      onTick?.(remaining);
 
       if (remaining <= 0 && !hasExpired) {
         setHasExpired(true);
@@ -41,7 +44,7 @@ export default function Timer({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [endTime, hasExpired, onExpire]);
+  }, [endTime, hasExpired, onExpire, onTick]);
 
   const isCritical = remainingSec <= 60;
   const isWarning = remainingSec <= 300 && remainingSec > 60;
