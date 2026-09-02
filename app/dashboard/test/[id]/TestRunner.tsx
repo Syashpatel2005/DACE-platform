@@ -32,6 +32,12 @@ type PaletteItem = {
   isMarkedReview: boolean;
 };
 
+function formatRemaining(sec: number): string {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
 export default function TestRunner({
   testId,
   initialStatus,
@@ -46,8 +52,6 @@ export default function TestRunner({
   startedAt: string | null;
 }) {
   const router = useRouter();
-  const [showSubmitDialog, setShowSubmitDialog] = useState(false);
-  const [timeRemainingSec, setTimeRemainingSec] = useState(0);
 
   const [currentPosition, setCurrentPosition] = useState(1);
   const [current, setCurrent] = useState<TestQuestionData | null>(null);
@@ -60,6 +64,8 @@ export default function TestRunner({
   const [startedAt, setStartedAt] = useState<string | null>(initialStartedAt);
   const [submitting, setSubmitting] = useState(false);
   const [palette, setPalette] = useState<PaletteItem[]>([]);
+  const [showSubmitDialog, setShowSubmitDialog] = useState(false);
+  const [timeRemainingSec, setTimeRemainingSec] = useState(0);
 
   const questionStartTime = useRef<number>(0);
 
@@ -166,11 +172,6 @@ export default function TestRunner({
   function handleExpire() {
     submitTest();
   }
-  function formatRemaining(sec: number): string {
-  const m = Math.floor(sec / 60);
-  const s = sec % 60;
-  return `${m}:${s.toString().padStart(2, "0")}`;
-}
 
   useEffect(() => {
     if (started) {
@@ -208,119 +209,130 @@ export default function TestRunner({
     );
   }
 
-  if (loading || !current) {
-    return <div className="p-6 text-text-secondary">Loading question...</div>;
-  }
-
   return (
     <div className="flex flex-col gap-6 p-6 lg:flex-row">
       <aside className="w-full shrink-0 rounded-lg border border-border-default bg-surface p-4 lg:w-64">
         {startedAt && (
-          <Timer
-            startedAt={startedAt}
-            durationMin={durationMin}
-            onExpire={handleExpire}
-            onTick={setTimeRemainingSec}
-          />
+          <div className="mb-4">
+            <Timer
+              startedAt={startedAt}
+              durationMin={durationMin}
+              onExpire={handleExpire}
+              onTick={setTimeRemainingSec}
+            />
+          </div>
         )}
         <QuestionPalette
           palette={palette}
           currentPosition={currentPosition}
           onNavigate={(pos) => goToPosition(pos)}
         />
-        <SubmitConfirmDialog
-          open={showSubmitDialog}
-          onOpenChange={setShowSubmitDialog}
-          palette={palette}
-          timeRemainingLabel={formatRemaining(timeRemainingSec)}
-          onConfirm={submitTest}
-          submitting={submitting}
-        />
       </aside>
 
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
-        <div className="flex items-center justify-between text-sm text-text-secondary">
-          <span>Question {current.position} of {questionCount}</span>
-          <span className="flex items-center gap-3">
-            {saving && <span className="text-xs italic">Saving...</span>}
-            <span>{current.question.marks} mark{current.question.marks !== 1 ? "s" : ""}</span>
-          </span>
-        </div>
-
-        <Card>
-          <CardContent className="flex flex-col gap-4 pt-6">
-            <div className="text-text-primary">
-              <MathText text={current.question.questionText} />
+        {loading || !current ? (
+          <div className="flex min-h-[300px] items-center justify-center text-text-secondary">
+            Loading question...
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center justify-between text-sm text-text-secondary">
+              <span>Question {current.position} of {questionCount}</span>
+              <span className="flex items-center gap-3">
+                {saving && <span className="text-xs italic">Saving...</span>}
+                <span>{current.question.marks} mark{current.question.marks !== 1 ? "s" : ""}</span>
+              </span>
             </div>
 
-            {current.question.questionType === "MCQ" && current.question.options && (
-              <div className="flex flex-col gap-3">
-                {current.question.options.map((opt, i) => (
-                  <label
-                    key={i}
-                    className="flex cursor-pointer items-center gap-3 rounded-md border border-border-default p-3 hover:bg-surface-muted has-checked:border-brand-blue has-checked:bg-surface-muted"
-                  >
-                    <input
-                      type="radio"
-                      name="option"
-                      checked={selectedOption === i}
-                      onChange={() => setSelectedOption(i)}
-                      className="accent-brand-blue"
-                    />
-                    <span className="text-text-primary">
-                      <MathText text={opt} />
-                    </span>
-                  </label>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            <Card>
+              <CardContent className="flex flex-col gap-4 pt-6">
+                <div className="text-text-primary">
+                  <MathText text={current.question.questionText} />
+                </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setShowSubmitDialog(true)}
-            className="border-destructive text-destructive hover:bg-destructive/10"
-          >
-            Submit Test
-          </Button>
+                {current.question.questionType === "MCQ" && current.question.options && (
+                  <div className="flex flex-col gap-3">
+                    {current.question.options.map((opt, i) => (
+                      <label
+                        key={i}
+                        className="flex cursor-pointer items-center gap-3 rounded-md border border-border-default p-3 hover:bg-surface-muted has-checked:border-brand-blue has-checked:bg-surface-muted"
+                      >
+                        <input
+                          type="radio"
+                          name="option"
+                          checked={selectedOption === i}
+                          onChange={() => setSelectedOption(i)}
+                          className="accent-brand-blue"
+                        />
+                        <span className="text-text-primary">
+                          <MathText text={opt} />
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
-          <Button
-            variant="ghost"
-            disabled={selectedOption === null}
-            onClick={clearResponse}
-            className="text-text-secondary hover:text-destructive"
-          >
-            Clear Response
-          </Button>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <Button
+                variant="outline"
+                disabled={currentPosition <= 1}
+                onClick={() => goToPosition(currentPosition - 1)}
+              >
+                Previous
+              </Button>
 
-          <Button variant="outline" onClick={toggleMarkForReview}>
-            {current.isMarkedReview ? "Unmark Review" : "Mark for Review"}
-          </Button>
+              <Button
+                variant="ghost"
+                disabled={selectedOption === null}
+                onClick={clearResponse}
+                className="text-text-secondary hover:text-destructive"
+              >
+                Clear Response
+              </Button>
 
-          <Button variant="outline" onClick={markAndNext} disabled={currentPosition >= questionCount}>
-            Mark & Next
-          </Button>
+              <Button variant="outline" onClick={toggleMarkForReview}>
+                {current.isMarkedReview ? "Unmark Review" : "Mark for Review"}
+              </Button>
 
-          {currentPosition >= questionCount ? (
-            <Button
-              disabled={submitting}
-              onClick={submitTest}
-              className="bg-brand-blue hover:bg-brand-navy"
-            >
-              {submitting ? "Submitting..." : "Submit Test"}
-            </Button>
-          ) : (
-            <Button
-              onClick={() => goToPosition(currentPosition + 1)}
-              className="bg-brand-blue hover:bg-brand-navy"
-            >
-              Save & Next
-            </Button>
-          )}
-        </div>
+              <Button
+                variant="outline"
+                onClick={markAndNext}
+                disabled={currentPosition >= questionCount}
+              >
+                Mark & Next
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={() => setShowSubmitDialog(true)}
+                className="border-destructive text-destructive hover:bg-destructive/10"
+              >
+                Submit Test
+              </Button>
+
+              {currentPosition < questionCount && (
+                <Button
+                  onClick={() => goToPosition(currentPosition + 1)}
+                  className="bg-brand-blue hover:bg-brand-navy"
+                >
+                  Save & Next
+                </Button>
+              )}
+            </div>
+          </>
+        )}
       </div>
+
+      <SubmitConfirmDialog
+        open={showSubmitDialog}
+        onOpenChange={setShowSubmitDialog}
+        palette={palette}
+        timeRemainingLabel={formatRemaining(timeRemainingSec)}
+        onConfirm={submitTest}
+        submitting={submitting}
+      />
     </div>
   );
 }
