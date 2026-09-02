@@ -7,7 +7,6 @@ import type { GenerateTestInput, GenerateTestResponse } from "@/lib/types";
 export async function POST(request: Request) {
   try {
     const { userId: clerkId } = await auth();
-    
     if (!clerkId) {
       return NextResponse.json(
         { success: false, error: "Not authenticated" } satisfies GenerateTestResponse,
@@ -25,6 +24,86 @@ export async function POST(request: Request) {
 
     const body: GenerateTestInput = await request.json();
 
+    // --- FULL_MOCK: derive everything from ExamRules ---
+    if (body.testType === "FULL_MOCK") {
+      const rules = await prisma.examRules.findFirst({ where: { isActive: true } });
+      if (!rules) {
+        return NextResponse.json(
+          { success: false, error: "No active exam rules configured" } satisfies GenerateTestResponse,
+          { status: 500 }
+        );
+      }
+
+      const gaSubject = await prisma.subject.findUnique({ where: { slug: "general-aptitude" } });
+      if (!gaSubject) {
+        return NextResponse.json(
+          { success: false, error: "General Aptitude subject not found" } satisfies GenerateTestResponse,
+          { status: 500 }
+        );
+      }
+
+      const daSubjects = await prisma.subject.findMany({
+        where: { slug: { not: "general-aptitude" } },
+      });
+      const daSubjectIds = daSubjects.map((s) => s.id);
+
+      const [gaQuestions, daQuestions] = await Promise.all([
+        prisma.question.findMany({
+          where: { subjectId: gaSubject.id, status: "APPROVED" },
+        }),
+        prisma.question.findMany({
+          where: { subjectId: { in: daSubjectIds }, status: "APPROVED" },
+        }),
+      ]);
+
+      const selectedGA = shuffle(gaQuestions).slice(0, rules.gaQuestionCount);
+      const selectedDA = shuffle(daQuestions).slice(0, rules.daQuestionCount);
+      const selected = [...selectedGA, ...selectedDA];
+
+      if (selected.length === 0) {
+        return NextResponse.json(
+          { success: false, error: "No approved questions available for a full mock test" } satisfies GenerateTestResponse,
+          { status: 404 }
+        );
+      }
+
+      const totalMarks = selected.reduce((sum, q) => sum + q.marks, 0);
+
+      const test = await prisma.test.create({
+        data: {
+          userId: user.id,
+          testType: "FULL_MOCK",
+          title: rules.name,
+          durationMin: rules.durationMin,
+          questionCount: selected.length,
+          config: {
+            gaRequested: rules.gaQuestionCount,
+            gaActual: selectedGA.length,
+            daRequested: rules.daQuestionCount,
+            daActual: selectedDA.length,
+          },
+          maxMarks: totalMarks,
+          status: "NOT_STARTED",
+          questions: {
+            create: selected.map((q, index) => ({
+              questionId: q.id,
+              position: index + 1,
+            })),
+          },
+        },
+      });
+
+      return NextResponse.json(
+        {
+          success: true,
+          testId: test.id,
+          actualQuestionCount: selected.length,
+        } satisfies GenerateTestResponse,
+        { status: 201 }
+      );
+    }
+
+    // --- Existing subject/topic/custom logic ---
     if (!body.subjectIds || body.subjectIds.length === 0) {
       return NextResponse.json(
         { success: false, error: "At least one subject must be selected" } satisfies GenerateTestResponse,
@@ -57,10 +136,7 @@ export async function POST(request: Request) {
 
     if (candidateQuestions.length === 0) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "No approved questions found matching the selected criteria",
-        } satisfies GenerateTestResponse,
+        { success: false, error: "No approved questions found matching the selected criteria" } satisfies GenerateTestResponse,
         { status: 404 }
       );
     }

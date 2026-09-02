@@ -30,10 +30,10 @@ export type SyllabusResponse =
   | { success: false; error: string };
 export type GenerateTestInput = {
   testType: "FULL_MOCK" | "SUBJECT_TEST" | "TOPIC_TEST" | "CUSTOM" | "QUICK_PRACTICE";
-  subjectIds: string[];
+  subjectIds?: string[];
   topicIds?: string[];
-  questionCount: number;
-  durationMin: number;
+  questionCount?: number;
+  durationMin?: number;
   difficulty?: "EASY" | "MEDIUM" | "MEDIUM_HARD" | "HARD" | "VERY_HARD";
 };
 
@@ -50,3 +50,4 @@ export type SaveAnswerInput = {
 export type SaveAnswerResponse =
   | { success: true }
   | { success: false; error: string };
+
