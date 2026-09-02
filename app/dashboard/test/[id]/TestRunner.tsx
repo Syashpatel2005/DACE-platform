@@ -153,19 +153,29 @@ export default function TestRunner({
     setLoading(false);
   }
 
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
   async function submitTest() {
     if (submitting) return;
 
     await saveCurrentAnswer();
 
     setSubmitting(true);
-    const res = await fetch(`/api/tests/${testId}/submit`, { method: "POST" });
-    const data = await res.json();
+    setSubmitError(null);
 
-    if (data.success) {
-      router.push(`/dashboard/test/${testId}/result`);
-    } else {
+    try {
+      const res = await fetch(`/api/tests/${testId}/submit`, { method: "POST" });
+      const data = await res.json();
+
+      if (data.success) {
+        router.push(`/dashboard/test/${testId}/result`);
+      } else {
+        setSubmitting(false);
+        setSubmitError(data.error ?? "Failed to submit. Your answers are saved — please try again.");
+      }
+    } catch {
       setSubmitting(false);
+      setSubmitError("Network error while submitting. Your answers are saved — please try again.");
     }
   }
 
@@ -216,6 +226,7 @@ export default function TestRunner({
     );
   }
 
+
   return (
     <div className="flex flex-col gap-6 p-6 lg:flex-row">
       <aside className="w-full shrink-0 rounded-lg border border-border-default bg-surface p-4 lg:w-64">
@@ -245,7 +256,30 @@ export default function TestRunner({
           </Button>
         )}
       </aside>
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
+            {submitError && (
+              <div className="rounded-md border border-destructive bg-destructive/10 p-4 text-sm text-destructive">
+                <p className="font-medium">{submitError}</p>
+                <Button
+                  size="sm"
+                  onClick={submitTest}
+                  className="mt-2 bg-destructive text-white hover:bg-destructive/90"
+                >
+                  Retry Submit
+                </Button>
+              </div>
+            )}
 
+        {loading || !current ? (
+          <div className="flex min-h-[300px] items-center justify-center text-text-secondary">
+            Loading question...
+          </div>
+        ) : (
+          <>
+            {/* ... existing question card and buttons ... */}
+          </>
+        )}
+      </div>
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
         {loading || !current ? (
           <div className="flex min-h-[300px] items-center justify-center text-text-secondary">
