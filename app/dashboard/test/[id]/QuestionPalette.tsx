@@ -13,13 +13,13 @@ function getPaletteState(item: PaletteItem): {
 } {
   if (item.isMarkedReview && item.isAnswered) {
     return {
-      label: "Answered + Marked for Review",
+      label: "Answered and marked for review",
       className: "bg-purple-600 text-white border-purple-700",
     };
   }
   if (item.isMarkedReview) {
     return {
-      label: "Marked for Review",
+      label: "Marked for review",
       className: "bg-purple-200 text-purple-900 border-purple-400 dark:bg-purple-900 dark:text-purple-100",
     };
   }
@@ -31,12 +31,12 @@ function getPaletteState(item: PaletteItem): {
   }
   if (item.isVisited) {
     return {
-      label: "Not Answered",
+      label: "Not answered",
       className: "bg-red-500 text-white border-red-600",
     };
   }
   return {
-    label: "Not Visited",
+    label: "Not visited",
     className: "bg-surface-muted text-text-secondary border-border-default",
   };
 }
@@ -51,17 +51,19 @@ export default function QuestionPalette({
   onNavigate: (position: number) => void;
 }) {
   return (
-    <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-5 gap-2">
+    <nav aria-label="Question navigation palette" className="flex flex-col gap-4">
+      <div className="grid grid-cols-5 gap-2" role="group" aria-label="Question numbers">
         {palette.map((item) => {
           const state = getPaletteState(item);
           const isCurrent = item.position === currentPosition;
           return (
             <button
               key={item.position}
+              type="button"
               onClick={() => onNavigate(item.position)}
-              title={state.label}
-              className={`flex h-9 w-9 items-center justify-center rounded-md border text-sm font-medium transition-transform ${state.className} ${
+              aria-label={`Question ${item.position}: ${state.label}${isCurrent ? ", current question" : ""}`}
+              aria-current={isCurrent ? "true" : undefined}
+              className={`flex h-9 w-9 items-center justify-center rounded-md border text-sm font-medium transition-transform focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue ${state.className} ${
                 isCurrent ? "ring-2 ring-brand-blue ring-offset-2 ring-offset-surface" : ""
               }`}
             >
@@ -71,14 +73,14 @@ export default function QuestionPalette({
         })}
       </div>
 
-      <div className="flex flex-col gap-1.5 text-xs text-text-secondary">
+      <div className="flex flex-col gap-1.5 text-xs text-text-secondary" aria-hidden="true">
         <LegendRow className="bg-surface-muted border border-border-default" label="Not Visited" />
         <LegendRow className="bg-red-500" label="Not Answered" />
         <LegendRow className="bg-green-600" label="Answered" />
         <LegendRow className="bg-purple-200 dark:bg-purple-900" label="Marked for Review" />
         <LegendRow className="bg-purple-600" label="Answered + Marked" />
       </div>
-    </div>
+    </nav>
   );
 }
 
