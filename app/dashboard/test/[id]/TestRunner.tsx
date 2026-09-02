@@ -172,6 +172,14 @@ export default function TestRunner({
   function handleExpire() {
     submitTest();
   }
+  function goToNextMarked() {
+  const marked = palette.filter((p) => p.isMarkedReview);
+  const next = marked.find((p) => p.position > currentPosition);
+  const target = next ?? marked[0];
+  if (target) {
+    goToPosition(target.position);
+  }
+  }
 
   useEffect(() => {
     if (started) {
@@ -227,6 +235,16 @@ export default function TestRunner({
           currentPosition={currentPosition}
           onNavigate={(pos) => goToPosition(pos)}
         />
+        {palette.some((p) => p.isMarkedReview) && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={goToNextMarked}
+            className="mt-4 w-full"
+          >
+            Next Marked Question
+          </Button>
+        )}
       </aside>
 
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
